@@ -124,7 +124,7 @@ def _serve_pyfunc(model):
     if pyfunc.ENV in conf:
         if not os.environ.get(DISABLE_ENV_CREATION) == "true":
             _install_pyfunc_deps(MODEL_PATH, install_mlflow=True)
-        bash_cmds += ["source /miniconda/bin/activate custom_env"]
+        # bash_cmds += ["source /miniconda/bin/activate custom_env"]
     nginx_conf = resource_filename(mlflow.models.__name__, "container/scoring_server/nginx.conf")
 
     # option to disable manually nginx. The default behavior is to enable nginx.
