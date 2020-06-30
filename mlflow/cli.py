@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import json
 import os
 import sys
@@ -12,6 +10,7 @@ import mlflow.azureml.cli
 import mlflow.db
 import mlflow.experiments
 import mlflow.models.cli
+import mlflow.deployments.cli
 import mlflow.projects as projects
 import mlflow.runs
 import mlflow.sagemaker.cli
@@ -61,7 +60,7 @@ def cli():
 @click.option("--experiment-id", envvar=tracking._EXPERIMENT_ID_ENV_VAR, type=click.STRING,
               help="ID of the experiment under which to launch the run.")
 # TODO: Add tracking server argument once we have it working.
-@click.option("--backend", "-b", metavar="BACKEND",
+@click.option("--backend", "-b", metavar="BACKEND", default="local",
               help="Execution backend to use for run. Supported values: 'local', 'databricks', "
                    "kubernetes (experimental). Defaults to 'local'. If running against "
                    "Databricks, will run against a Databricks workspace determined as follows: "
@@ -78,7 +77,7 @@ def cli():
                    "at https://www.mlflow.org/docs/latest/projects.html.")
 @cli_args.NO_CONDA
 @click.option("--storage-dir", envvar="MLFLOW_TMP_DIR",
-              help="Only valid when ``backend`` is local."
+              help="Only valid when ``backend`` is local. "
                    "MLflow downloads artifacts from distributed URIs passed to parameters of "
                    "type 'path' to subdirectories of storage_dir.")
 @click.option("--run-id", metavar="RUN_ID",
@@ -254,8 +253,8 @@ def _validate_static_prefix(ctx, param, value):  # pylint: disable=unused-argume
 @click.option("--waitress-opts", default=None,
               help="Additional command line options for waitress-serve.")
 @click.option("--expose-prometheus", default=None,
-              help="Path to the directory where metrics will be stored. If the directory"
-                   "doesn't exist, it will be created."
+              help="Path to the directory where metrics will be stored. If the directory "
+                   "doesn't exist, it will be created. "
                    "Activate prometheus exporter to expose metrics on /metrics endpoint.")
 def server(backend_store_uri, default_artifact_root, host, port,
            workers, static_prefix, gunicorn_opts, waitress_opts, expose_prometheus):
@@ -297,7 +296,7 @@ def server(backend_store_uri, default_artifact_root, host, port,
         sys.exit(1)
 
 
-@cli.command()
+@cli.command(short_help="Permanently delete runs in the `deleted` lifecycle stage.")
 @click.option("--backend-store-uri", metavar="PATH",
               default=DEFAULT_LOCAL_FILE_AND_ARTIFACT_PATH,
               help="URI of the backend store from which to delete runs. Acceptable URIs are "
@@ -336,6 +335,7 @@ def gc(backend_store_uri, run_ids):
 
 
 cli.add_command(mlflow.models.cli.commands)
+cli.add_command(mlflow.deployments.cli.commands)
 cli.add_command(mlflow.sagemaker.cli.commands)
 cli.add_command(mlflow.experiments.commands)
 cli.add_command(mlflow.store.artifact.cli.commands)
